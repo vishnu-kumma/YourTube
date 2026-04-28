@@ -28,7 +28,7 @@ const generateAccessAndRefreshTokens = async(userId)=>{
 
 // These are the actual functions that run when a request comes in
 // ab registerUser jo ki controller me define hai, wo function ek response bhejega.
-// to check whetehr response i.e api response is wroking or not: search thunder client(vsCode plugin) or postman (we'll down download postman)
+// to check whetehr response i.e api response is wroking or not: search thunder client(vsCode plugin) or postman (we'll download postman)
 //  search this on postman http://localhost:8000/users/register 
 /*
 first write small response to check , if it works fine then main code.
@@ -45,7 +45,7 @@ const registerUser = asyncHandler(async (req,res)=>{
    
  //This registerUser is wrapped in asyncHandler so errors are caught automatically.
 const registerUser = asyncHandler(async (req,res)=>{
-    // get user details from frontend, check validation,check if user already exists(username/email),check for images if available upload on cvloudinary
+    // get user details from frontend, check validation,check if user already exists(username/email),check for images if available upload on cloudinary
     // create user obect(as mongodb is nosql.so we create object in it)
     // remove password and refresh token as mongodb will return this as a response
     // check for user creation
@@ -143,6 +143,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
     const { refreshToken, accessToken } = await generateAccessAndRefreshTokens(user._id);
 
+    // .select("-password -refreshToken") tells the database: "Give me everything, but SUBTRACT (the minus sign) the password and the refreshToken."
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
 
     // Updated cookie options for production
@@ -162,7 +163,7 @@ const loginUser = asyncHandler(async (req, res) => {
             new ApiResponse(
                 200,
                 {
-                    user: loggedInUser,
+                    user: loggedInUser, // // This contains _id, username, email, fullname, avatar...
                     accessToken,
                     refreshToken
                 },
@@ -429,62 +430,7 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
     )
 })
 
-// all videos [comting out because of adding function new getWatchHistory function]
-// const getWatchHistory = asyncHandler(async(req, res) => {
-//     const user = await User.aggregate([
-//         {
-//             $match: {
-//                 _id: new mongoose.Types.ObjectId(req.user._id)
-//             }
-//         },
-//         {
-//             $lookup: {
-//                 from: "videos",
-//                 localField: "watchHistory",
-//                 foreignField: "_id",
-//                 as: "watchHistory",
-//                 pipeline: [
-//                     {
-//                         $lookup: {
-//                             from: "users",
-//                             localField: "owner",
-//                             foreignField: "_id",
-//                             as: "owner",
-//                             pipeline: [
-//                                 {
-//                                     $project: {
-//                                         fullName: 1,
-//                                         username: 1,
-//                                         avatar: 1
-//                                     }
-//                                 }
-//                             ]
-//                         }
-//                     },
-//                     {
-//                         $addFields:{
-//                             owner:{
-//                                 $first: "$owner"
-//                             }
-//                         }
-//                     }
-//                 ]
-//             }
-//         }
-//     ])
 
-//     return res
-//     .status(200)
-//     .json(
-//         new ApiResponse(
-//             200,
-//             user[0].watchHistory,
-//             "Watch history fetched successfully"
-//         )
-//     )
-// })
-
-// Replace your existing getWatchHistory with this new one
 const getWatchHistory = asyncHandler(async(req, res) => {
     const userId = req.user?._id;
 

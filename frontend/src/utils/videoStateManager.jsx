@@ -1,4 +1,4 @@
-// src/utils/videoStateManager.js
+
 // Simple state manager to cache video interactions
 
 class VideoStateManager {

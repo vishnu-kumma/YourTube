@@ -8,6 +8,9 @@ import {
 } from '../common/Icons';
 import { formatViews, timeAgo, formatDuration } from '../../utils/helpers';
 
+import BreakModal from "../common/BreakModal";
+import useWellness from "../../hooks/useWellness";
+
 const VideoWatchPage = ({ video, user, onClose }) => {
   // Current video being watched (can change when clicking suggested videos)
   const [currentVideo, setCurrentVideo] = useState(video);
@@ -18,11 +21,15 @@ const VideoWatchPage = ({ video, user, onClose }) => {
   const [subscriberCount, setSubscriberCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [videoKey, setVideoKey] = useState(0); // Force video element to remount
+  const [showPopup, setShowPopup] = useState(false);
+
   
   // Watch history tracking refs
   const videoRef = useRef(null);
   const intervalRef = useRef(null);
   const lastSavedTimeRef = useRef(0);
+
+  
 
   // Load video details when currentVideo changes
   useEffect(() => {
@@ -35,6 +42,9 @@ const VideoWatchPage = ({ video, user, onClose }) => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [currentVideo?._id]);
+
+
+useWellness(setShowPopup);
 
   // Watch history tracking
   useEffect(() => {
@@ -285,6 +295,9 @@ const VideoWatchPage = ({ video, user, onClose }) => {
             </div>
           )}
         </div>
+
+{showPopup && <BreakModal onClose={() => setShowPopup(false)} />}
+
       </div>
     </div>
   );

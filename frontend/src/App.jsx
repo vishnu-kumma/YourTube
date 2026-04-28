@@ -1,4 +1,5 @@
-// src/App.jsx
+// src/App.jsx :- Our project is using a combination of Context API and "Lifted State" (Standard Prop Passing).
+// Note:- This project is actually NOT using the Context API. It is using a Custom Hook [hooks/useAuth.jsx] that manages Local State.
 import React, { useState } from 'react';
 import { useAuth } from './hooks/useAuth';
 import Navbar from './components/common/Navbar';
@@ -13,7 +14,7 @@ import { PlayCircleIcon, UploadIcon } from './components/common/Icons';
 import './App.css';
 
 const App = () => {
-  const { user, loading, login, logout } = useAuth();
+  const { user, loading, login, logout } = useAuth(); // custom hook that manages Local State.
   const [activeTab, setActiveTab] = useState('home');
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [isWatchingVideo, setIsWatchingVideo] = useState(false);
@@ -57,6 +58,7 @@ const App = () => {
     );
   }
 
+  // authentication
   if (!user && activeTab === 'auth') {
     return <AuthForm onLogin={login} />;
   }

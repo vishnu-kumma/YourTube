@@ -89,93 +89,6 @@ const getAllVideos = asyncHandler(async (req, res) => {
     );
 });
 
-// COPY THIS ENTIRE FUNCTION and replace your publishAVideo in video.controllers.js
-
-// const publishAVideo = asyncHandler(async (req, res) => {
-//     // Get title from request body - handle both cases from frontend
-//     // Frontend might send "title" or "Title"
-//     const videoTitle = req.body.Title || req.body.title;
-//     const { description } = req.body;
-    
-//     console.log("=== PUBLISH VIDEO ===");
-//     console.log("Request body:", req.body);
-//     console.log("Video Title:", videoTitle);
-//     console.log("Description:", description);
-    
-//     // Validation
-//     if (!videoTitle || !description) {
-//         throw new ApiError(400, "Title and description are required");
-//     }
-    
-//     if (!req.files?.videoFile?.[0]) {
-//         throw new ApiError(400, "Video file is required");
-//     }
-    
-//     if (!req.files?.thumbnail?.[0]) {
-//         throw new ApiError(400, "Thumbnail is required");
-//     }
-    
-//     const videoLocalPath = req.files.videoFile[0].path;
-//     const thumbnailLocalPath = req.files.thumbnail[0].path;
-    
-//     try {
-//         // Upload to Cloudinary
-//         const videoUpload = await uploadOnCloudinary(videoLocalPath);
-//         const thumbnailUpload = await uploadOnCloudinary(thumbnailLocalPath);
-        
-//         if (!videoUpload) {
-//             throw new ApiError(500, "Error uploading video to Cloudinary");
-//         }
-        
-//         if (!thumbnailUpload) {
-//             throw new ApiError(500, "Error uploading thumbnail to Cloudinary");
-//         }
-        
-//         console.log("Cloudinary uploads successful");
-        
-//         // Create video document
-//         // IMPORTANT: Use "Title" (capital T) to match your video.models.js schema
-//         const video = await Video.create({
-//             videoFile: videoUpload.url,
-//             thumbnail: thumbnailUpload.url,
-//             Title: videoTitle,  // ✅ Capital T + correct variable
-//             description: description,
-//             duration: videoUpload.duration || 0,
-//             owner: req.user._id,
-//             isPublished: true
-//         });
-        
-//         console.log("Video created:", video._id);
-        
-//         // Cleanup temp files
-//         try {
-//             const fs = await import('fs');
-//             if (fs.existsSync(videoLocalPath)) fs.unlinkSync(videoLocalPath);
-//             if (fs.existsSync(thumbnailLocalPath)) fs.unlinkSync(thumbnailLocalPath);
-//         } catch (e) {
-//             console.error("Cleanup error:", e);
-//         }
-        
-//         return res.status(201).json(
-//             new ApiResponse(201, video, "Video published successfully")
-//         );
-        
-//     } catch (error) {
-//         console.error("Video upload error:", error.message);
-        
-//         // Cleanup on error
-//         try {
-//             const fs = await import('fs');
-//             if (fs.existsSync(videoLocalPath)) fs.unlinkSync(videoLocalPath);
-//             if (fs.existsSync(thumbnailLocalPath)) fs.unlinkSync(thumbnailLocalPath);
-//         } catch (e) {
-//             console.error("Cleanup error:", e);
-//         }
-        
-//         throw new ApiError(500, error.message || "Video upload failed");
-//     }
-// });
-// Update your publishAVideo function in video.controllers.js to handle tags
 
 const publishAVideo = asyncHandler(async (req, res) => {
     const videoTitle = req.body.Title || req.body.title;
@@ -270,86 +183,6 @@ const publishAVideo = asyncHandler(async (req, res) => {
     }
 });
 
-// const getVideoById = asyncHandler(async (req, res) => {
-//     const { videoId } = req.params;
-
-//     if (!isValidObjectId(videoId)) {
-//         throw new ApiError(400, "Invalid video ID");
-//     }
-
-//     // First check if video exists
-//     const videoExists = await Video.findById(videoId);
-//     if (!videoExists) {
-//         throw new ApiError(404, "Video not found");
-//     }
-
-//     // Increment views atomically
-//     await Video.findByIdAndUpdate(
-//         videoId,
-//         { $inc: { views: 1 } },
-//         { new: true }
-//     );
-
-//     // Aggregate video details with owner and likes info
-//     const video = await Video.aggregate([
-//         { 
-//             $match: { _id: new mongoose.Types.ObjectId(videoId) } 
-//         },
-//         {
-//             $lookup: {
-//                 from: "users",
-//                 localField: "owner",
-//                 foreignField: "_id",
-//                 as: "owner",
-//                 pipeline: [
-//                     { 
-//                         $project: { 
-//                             username: 1, 
-//                             fullname: 1, 
-//                             avatar: 1 
-//                         } 
-//                     }
-//                 ]
-//             }
-//         },
-//         {
-//             $lookup: {
-//                 from: "likes",
-//                 localField: "_id",
-//                 foreignField: "video",
-//                 as: "likes"
-//             }
-//         },
-//         {
-//             $addFields: {
-//                 owner: { $first: "$owner" },
-//                 likesCount: { $size: "$likes" },
-//                 isLiked: {
-//                     $cond: {
-//                         if: req.user?._id,
-//                         then: { $in: [req.user._id, "$likes.likedBy"] },
-//                         else: false
-//                     }
-//                 }
-//             }
-//         },
-//         { 
-//             $project: { 
-//                 likes: 0 
-//             } 
-//         }
-//     ]);
-
-//     if (!video || video.length === 0) {
-//         throw new ApiError(404, "Video not found");
-//     }
-
-//     return res
-//         .status(200)
-//         .json(new ApiResponse(200, video[0], "Video fetched successfully"));
-// });
-
-// Replace your getVideoById function in video.controllers.js
 
 const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
@@ -530,25 +363,42 @@ const updateWatchHistory = asyncHandler(async (req, res) => {
     const isCompleted = (currentTime / totalDuration) >= 0.9; 
 
     // 3. Find and Update/Create the WatchHistory document (The CORE LOGIC)
-    const historyRecord = await WatchHistory.findOneAndUpdate(
-        { userId, videoId }, // Query: Find by user and video
-        {
-            $set: {
-                watchDurationSeconds: Math.round(currentTime), 
-                isCompleted: isCompleted, 
-                lastWatchedAt: new Date(), 
-            },
-            // If the record doesn't exist, these fields are set for the first time
-            $setOnInsert: {
-                userId: userId,
-                videoId: videoId,
-            }
+    // Step 1: Find existing record
+const existing = await WatchHistory.findOne({ userId, videoId });
+
+let delta = 0;
+
+if (existing) {
+    delta = currentTime - (existing.lastSavedTime || 0);
+
+    // Prevent negative values (rewind case)
+    if (delta < 0) delta = 0;
+} else {
+    delta = currentTime;
+}
+
+// Step 2: Update with delta
+const historyRecord = await WatchHistory.findOneAndUpdate(
+    { userId, videoId },
+    {
+        $inc: {
+            watchDurationSeconds: delta
         },
-        { 
-            new: true, // Return the updated document
-            upsert: true, // Create if not found
+        $set: {
+            lastWatchedAt: new Date(),
+            lastSavedTime: currentTime,
+            isCompleted: isCompleted
+        },
+        $setOnInsert: {
+            userId: userId,
+            videoId: videoId
         }
-    );
+    },
+    {
+        new: true,
+        upsert: true
+    }
+);
 
     // 4. Send a success response
     return res

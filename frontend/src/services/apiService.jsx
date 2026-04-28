@@ -1,19 +1,22 @@
-// src/services/apiService.jsx
-// API Configuration - Environment-based URLs
+/* 
+    apiService.jsx — Your Frontend's API Client
+    Think of this exactly like your backend's route definitions, but in reverse — it's the caller side. 
+    we wrote a helper function called makeRequest. Instead of writing fetch() 50 times, they use this wrapper.
+    It always sends credentials: 'include' so your cookies (auth tokens) travel with every request.
+    This is literally just `fetch('/api/v1/users/login', { method: 'POST', body: ... })` — you definitely wrote that endpoint on the backend!
+*/
 
 const getApiBaseUrl = () => {
   // Check if we're in production
   if (import.meta.env.MODE === 'production') {
     return import.meta.env.VITE_API_BASE_URL || 'https://yourtube-backend.vercel.app/api/v1';
   }
-  // Development - FIXED: Use port 8000 instead of 3000
-  return 'http://localhost:8000/api/v1';  // Changed from 3000 to 8000
+  
+  return 'http://localhost:8000/api/v1'; 
 };
 
 const API_BASE_URL = getApiBaseUrl();
 
-console.log('API Base URL:', API_BASE_URL);
-console.log('Environment Mode:', import.meta.env.MODE);
 
 // Enhanced error handling wrapper
 const makeRequest = async (url, options = {}) => {
@@ -23,8 +26,6 @@ const makeRequest = async (url, options = {}) => {
       credentials: 'include' // Always include credentials
     });
     
-    // Log response details for debugging
-    console.log(`${options.method || 'GET'} ${url}:`, response.status);
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -39,7 +40,8 @@ const makeRequest = async (url, options = {}) => {
   }
 };
 
-// API Service
+// API Service :- The number of functions in your apiService (frontend) usually matches the number of routes you have in your backend.
+// you might have a VideoCard component. that might call apiService.getVideoById(id) only when it needs to display. 
 export const apiService = {
   // Auth
   register: async (formData) => {
@@ -65,6 +67,7 @@ export const apiService = {
 
   getCurrentUser: async () => {
     return makeRequest(`${API_BASE_URL}/users/current-user`);
+    // if you don't specify a method, fetch automatically assumes you want a GET request.
   },
 
 
@@ -294,6 +297,14 @@ getTrendingVideos: async (limit = 10) => {
       body: JSON.stringify(updateData)
     });
   },
+
+
+  healthcheck: async () => {
+  return makeRequest(`${API_BASE_URL}/healthcheck`);
+},
+
+
+
 
   changePassword: async (passwordData) => {
     return makeRequest(`${API_BASE_URL}/users/change-password`, {

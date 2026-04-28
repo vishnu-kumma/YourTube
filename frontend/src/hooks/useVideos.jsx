@@ -1,3 +1,14 @@
+/*
+  
+`useVideos.jsx` — Fetching the Video Feed
+
+Even simpler — calls `GET /videos?page=1&limit=20&query=...` and stores results in state.
+The `searchQuery` parameter in `useEffect([searchQuery])` means *"re-fetch whenever the search term changes."*
+
+**The Big Picture So Far:**
+-->  Backend API  ←→  apiService.jsx  ←→  useAuth / useVideos  ←→  UI Components
+  
+*/
 import { useState, useEffect } from 'react';
 import { apiService } from '../services/apiService';
 

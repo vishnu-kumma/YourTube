@@ -27,6 +27,16 @@ const watchHistorySchema = new Schema({
         default: Date.now,
     },
     
+    lastSavedTime: {
+        type: Number,
+        default: 0
+    },
+    lastBreakNotifiedAt: {
+        type: Date,
+        default: null
+    },
+
+
     // 5. Optional but helpful flag for displaying a "Completed" status
     isCompleted: {
         type: Boolean,

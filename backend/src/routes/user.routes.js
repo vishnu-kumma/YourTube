@@ -18,7 +18,7 @@ const router = Router()
 //  search this on postman http://localhost:8000/users/register 
 router.route("/register").post(
     
-    upload.fields([    // upload humne multer se liya so that images ya file user se lya ja sake
+    upload.fields([  // upload: humne multer se liya .You are asking the user for an avatar and coverImage. Standard Express cannot "read" files; it only reads text.
         {
             name: "avatar",
             maxCount:1
@@ -33,16 +33,16 @@ router.route("/register").post(
 
 )
 
-router.route("/login").post(loginUser)
+router.route("/login").post(loginUser)  // POST: "Take this new data." ->	/login or /register (You are sending credentials to create a session).
 
 //secured routes
-router.route("/logout").post(verifyJWT, logoutUser)
+router.route("/logout").post(verifyJWT, logoutUser) 
 router.route("/refresh-token").post(refreshAccessToken)
 router.route("/change-password").post(verifyJWT, changeCurrentPassword)
-router.route("/current-user").get(verifyJWT, getCurrentUser)
+router.route("/current-user").get(verifyJWT, getCurrentUser) //GET: "Give me data." -> /current-user (You just want to see who is logged in).
 router.route("/update-account").patch(verifyJWT, updateAccountDetails)
 
-router.route("/avatar").patch(verifyJWT, upload.single("avatar"), updateUserAvatar)
+router.route("/avatar").patch(verifyJWT, upload.single("avatar"), updateUserAvatar) // PATCH: "Update a small part." ->	/avatar (You aren't changing the whole user, just the photo).
 router.route("/cover-image").patch(verifyJWT, upload.single("coverImage"), updateUserCoverImage)
 
 router.route("/c/:username").get(verifyJWT, getUserChannelProfile)
@@ -50,4 +50,3 @@ router.route("/history").get(verifyJWT, getWatchHistory)
 
 export default router
 
-// now call this router in app.js
