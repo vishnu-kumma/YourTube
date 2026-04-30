@@ -1,4 +1,4 @@
-import { WatchHistory } from "../models/watchHistory.model.js";
+import { WatchHistory } from "../models/WatchHistory.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
