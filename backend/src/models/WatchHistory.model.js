@@ -31,6 +31,7 @@ const watchHistorySchema = new Schema({
         type: Number,
         default: 0
     },
+    
     lastBreakNotifiedAt: {
         type: Date,
         default: null

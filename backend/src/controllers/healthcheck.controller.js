@@ -16,27 +16,34 @@ const healthcheck = asyncHandler(async (req, res) => {
         today.setHours(0, 0, 0, 0);
 
         const stats = await WatchHistory.aggregate([
-            {
-                $match: {
-                    userId,
-                    lastWatchedAt: { $gte: today }
-                }
-            },
-            {
-                $group: {
-                    _id: null,
-                    totalWatchTime: { $sum: "$watchDurationSeconds" },
-                    lastBreak: { $max: "$lastBreakNotifiedAt" }
-                }
-            }
-        ]);
+  { $match: { userId } },
+  { $sort: { lastWatchedAt: -1 } },
+  { $limit: 10 }
+]);
 
-        const watchTime = stats[0]?.totalWatchTime || 0;
-        const lastBreak = stats[0]?.lastBreak;
+let sessionTime = 0;
+let lastBreak = null;
+
+for (let i = 0; i < stats.length; i++) {
+  if (i === 0) {
+    sessionTime += stats[i].watchDurationSeconds;
+    lastBreak = stats[i].lastBreakNotifiedAt;
+  } else {
+    const diff =
+      (new Date(stats[i - 1].lastWatchedAt) -
+        new Date(stats[i].lastWatchedAt)) /
+      1000;
+
+    // if gap > 2 min → break session
+    if (diff > 120) break;
+
+    sessionTime += stats[i].watchDurationSeconds;
+  }
+}
 
         const now = new Date();
 
-        if (watchTime > BREAK_THRESHOLD) {
+        if (sessionTime > BREAK_THRESHOLD) {
             const canNotify =
                 !lastBreak ||
                 (now - new Date(lastBreak)) / 1000 > COOLDOWN;
