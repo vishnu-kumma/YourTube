@@ -2,8 +2,8 @@ import { WatchHistory } from "../models/watchHistory.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
-const BREAK_THRESHOLD = 1800; // 30 min
-const COOLDOWN = 900; // 15 min
+const BREAK_THRESHOLD = 30; // 30 min
+const COOLDOWN = 15; // 15 min
 
 const healthcheck = asyncHandler(async (req, res) => {
     const userId = req.user?._id;

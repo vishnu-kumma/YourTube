@@ -13,7 +13,7 @@ const useWellness = (setShowPopup) => {
       } catch (err) {
         console.error("Healthcheck failed", err);
       }
-    }, 60000);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);
